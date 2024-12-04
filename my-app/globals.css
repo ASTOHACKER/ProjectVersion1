@@ -59,7 +59,6 @@ label {
 label + input {
   margin-top: -2px;
 }
-
 button, .button {
   @apply flex w-full justify-center gap-2 text-gray-700 font-medium;
   @apply border border-gray-300 rounded-xl px-6 py-2;
