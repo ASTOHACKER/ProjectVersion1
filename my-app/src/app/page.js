@@ -16,19 +16,19 @@ export default function Home() {
             <div className="text-gray-500 max-w-md mx-auto flex flex-col gap-4">
               <h2 className="text-xl font-bold">Quick Order</h2>
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magni minima odit recusandae. Illum ipsa non repudiandae? Eum ipsam iste quos suscipit tempora? Aperiam esse fugiat inventore laboriosam officiis quam rem!
+                การสั่งซื้อที่รวดเร็ว
               </p>
             </div>
             <div className="text-gray-500 max-w-md mx-auto flex flex-col gap-4">
               <h2 className="text-xl font-bold">Fast Delivery</h2>
               <p>
-                At consectetur delectus ducimus est facere iure molestias obcaecati quaerat vitae voluptate? Aspernatur dolor explicabo iste minus molestiae pariatur provident quibusdam saepe?
+                การจัดส่งที่รวดเร็ว
               </p>
             </div>
             <div className="text-gray-500 max-w-md mx-auto flex flex-col gap-4">
               <h2 className="text-xl font-bold">Secure Payment</h2>
               <p>
-                Laborum molestias neque nulla obcaecati odio quia quod reprehenderit sit vitae voluptates? Eos, tenetur.
+                การชําระเงินที่ปลอดภัย
               </p>
             </div>
           </div>
