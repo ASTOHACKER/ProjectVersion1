@@ -5,7 +5,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
 // GET /api/orders - Get all orders for the current user
-export async function GET() {
+export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -13,6 +13,25 @@ export async function GET() {
     }
 
     await connectToDatabase();
+
+    const { searchParams } = new URL(request.url);
+    const paymentIntent = searchParams.get('payment_intent');
+
+    if (paymentIntent) {
+      // If payment_intent is provided, return specific order
+      const order = await Order.findOne({
+        userId: session.user.id,
+        paymentIntentId: paymentIntent
+      });
+      
+      if (!order) {
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+      }
+      
+      return NextResponse.json(order);
+    }
+
+    // Otherwise return all orders for the user
     const orders = await Order.find({ userId: session.user.id })
       .sort({ createdAt: -1 });
 
