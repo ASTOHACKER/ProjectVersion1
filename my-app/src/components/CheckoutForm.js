@@ -8,6 +8,12 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { useCart } from '@/app/providers/CartProvider';
 
+/**
+ * Component สำหรับแสดง form ชำระเงิน
+ * จะใช้ค่า amount และ formData ที่ส่งมาจาก props
+ * amount คือ จำนวนเงินที่ต้องการชำระ
+ * formData คือ ข้อมูลผู้ใช้ (name, address, phone, postalCode)
+ */
 export default function CheckoutForm({ amount, formData }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -46,11 +52,37 @@ export default function CheckoutForm({ amount, formData }) {
       if (error) {
         toast.error(error.message || 'เกิดข้อผิดพลาดในการชำระเงิน กรุณาลองใหม่อีกครั้ง');
       } else {
-        if (typeof clearCart === 'function') {
-          clearCart();
+        try {
+          // Save order information
+          const orderData = {
+            items: JSON.parse(localStorage.getItem('cart') || '[]'),
+            totalAmount: amount,
+            status: 'processing',
+            shippingDetails: formData,
+            paymentIntentId: elements._elements.payment.intentId
+          };
+
+          const response = await fetch('/api/orders', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to save order');
+          }
+
+          if (typeof clearCart === 'function') {
+            clearCart();
+          }
+          toast.success('ชำระเงินสำเร็จ! ขอบคุณที่ใช้บริการ');
+          router.push('/order-success');
+        } catch (err) {
+          console.error('Error saving order:', err);
+          toast.error('การชำระเงินสำเร็จแต่ไม่สามารถบันทึกคำสั่งซื้อได้');
         }
-        toast.success('ชำระเงินสำเร็จ! ขอบคุณที่ใช้บริการ');
-        router.push('/order-success');
       }
     } catch (err) {
       toast.error('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
