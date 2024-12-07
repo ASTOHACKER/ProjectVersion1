@@ -48,25 +48,35 @@ export async function GET(request) {
 // POST /api/orders - Create a new order
 export async function POST(request) {
   try {
+    console.log('เริ่มสร้างออเดอร์ใหม่...');
+    
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.log('ไม่พบ session ผู้ใช้');
+      return NextResponse.json({ error: 'กรุณาเข้าสู่ระบบก่อนสั่งซื้อ' }, { status: 401 });
     }
+    console.log('ผู้ใช้:', session.user);
 
     const data = await request.json();
+    console.log('ข้อมูลออเดอร์ที่ได้รับ:', data);
+
     await connectToDatabase();
+    console.log('เชื่อมต่อฐานข้อมูลสำเร็จ');
 
     const order = new Order({
       userId: session.user.id,
       ...data,
     });
+    console.log('สร้างออเดอร์:', order);
 
     await order.save();
+    console.log('บันทึกออเดอร์สำเร็จ');
+    
     return NextResponse.json(order);
   } catch (error) {
-    console.error('Error creating order:', error);
+    console.error('เกิดข้อผิดพลาดในการสร้างออเดอร์:', error);
     return NextResponse.json(
-      { error: 'Failed to create order' },
+      { error: 'ไม่สามารถสร้างออเดอร์ได้' },
       { status: 500 }
     );
   }

@@ -7,7 +7,7 @@
     return (
       <>
       <Header />
-        <main className="max-w-6xl mx-auto p-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg mt-8">
+        <main className="max-w-6xl mx-auto p-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg mt-8 h-screen">
           <Hero />
           <div className="mt-12">
             <SectionHeader title="Our Features" subTitle="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Natus, quod." />

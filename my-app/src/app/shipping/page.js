@@ -83,26 +83,38 @@ export default function Shipping() {
     if (formData.paymentMethod === 'cod') {
       try {
         const orderData = {
-          customerInfo: formData,
           items: cart,
-          subtotal: calculateSubtotal(),
-          shippingCost: shippingCost,
-          codFee: codFee,
-          total: calculateTotal(),
-          orderDate: new Date().toISOString()
-        }
+          totalAmount: calculateTotal(),
+          status: 'pending',
+          shippingDetails: {
+            name: formData.name,
+            address: formData.address,
+            phone: formData.phone,
+            postalCode: formData.postalCode
+          }
+        };
 
-        console.log('Sending order:', orderData)
+        const response = await fetch('/api/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderData),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save order');
+        }
         
         if (typeof clearCart === 'function') {
-          clearCart()
+          clearCart();
         }
         
-        toast.success('สั่งซื้อสำเร็จ! ขอบคุณที่ใช้บริการ')
-        router.push('/order-success')
+        toast.success('สั่งซื้อสำเร็จ! ขอบคุณที่ใช้บริการ');
+        router.push('/order-success');
       } catch (error) {
-        toast.error('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
-        console.error('Order error:', error)
+        toast.error('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+        console.error('Order error:', error);
       }
     }
   }

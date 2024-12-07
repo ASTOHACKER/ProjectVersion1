@@ -28,7 +28,8 @@ export default function OrderSuccess() {
   }, [payment_intent]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow">
         <div className="text-center">
           <div className="text-green-500 text-6xl mb-4">✓</div>
@@ -81,6 +82,7 @@ export default function OrderSuccess() {
           </Link>
         </div>
       </div>
+    </div>
     </div>
   );
 }

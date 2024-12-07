@@ -1,9 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import clientPromise from "./mongodb";
+import connectDB from "./mongodb";
 
 export const authOptions = {
-  adapter: MongoDBAdapter(clientPromise),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -11,11 +9,19 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      // Add user ID to session
-      session.user.id = user.id;
+    async session({ session, token }) {
+      // Add user ID to session from token
+      if (token?.sub) {
+        session.user.id = token.sub;
+      }
       return session;
     },
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+      }
+      return token;
+    }
   },
   pages: {
     signIn: '/auth/signin',
