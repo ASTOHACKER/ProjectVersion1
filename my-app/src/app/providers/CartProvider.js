@@ -2,9 +2,11 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 
+// สร้าง context สำหรับตะกร้าสินค้า
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
+  // สร้าง state สำหรับเก็บรายการสินค้าในตะกร้า
   const [cartItems, setCartItems] = useState([]);
 
   // โหลดข้อมูลตะกร้าจาก localStorage เมื่อ component mount
@@ -22,6 +24,7 @@ export function CartProvider({ children }) {
     }
   }, [cartItems]);
 
+  // เพิ่มสินค้าลงในตะกร้า
   const addToCart = (item) => {
     setCartItems(prev => {
       const existingItem = prev.find(i => i.id === item.id);
@@ -36,6 +39,7 @@ export function CartProvider({ children }) {
     });
   };
 
+  // ลบสินค้าออกจากตะกร้า
   const removeFromCart = (itemId) => {
     setCartItems(prev => prev.filter(item => item.id !== itemId));
     if (cartItems.length === 1) {
@@ -43,6 +47,7 @@ export function CartProvider({ children }) {
     }
   };
 
+  // อัพเดทจำนวนสินค้าในตะกร้า
   const updateQuantity = (itemId, quantity) => {
     if (quantity < 1) return;
     setCartItems(prev =>
@@ -54,19 +59,23 @@ export function CartProvider({ children }) {
     );
   };
 
+  // ล้างตะกร้าสินค้าทั้งหมด
   const clearCart = () => {
     setCartItems([]);
     localStorage.removeItem('cart');
   };
 
+  // คำนวณราคารวมของสินค้าในตะกร้า
   const getCartTotal = () => {
     return cartItems.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
   };
 
+  // นับจำนวนสินค้าทั้งหมดในตะกร้า
   const getCartCount = () => {
     return cartItems.reduce((count, item) => count + (item.quantity || 1), 0);
   };
 
+  // สร้าง context provider พร้อมค่าที่จะส่งไปยัง consumer
   return (
     <CartContext.Provider value={{
       cartItems,
@@ -82,6 +91,7 @@ export function CartProvider({ children }) {
   );
 }
 
+// สร้าง custom hook สำหรับใช้งาน CartContext
 export function useCart() {
   const context = useContext(CartContext);
   if (!context) {
