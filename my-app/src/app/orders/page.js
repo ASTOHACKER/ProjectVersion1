@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
-
+import Header from '../components/Header';
 export default function OrderHistory() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +47,8 @@ export default function OrderHistory() {
 
   return (
     <div>
-      <main>
+    <Header/>
+      <main className='h-screen'>
       <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">ประวัติการสั่งซื้อ</h1>
       

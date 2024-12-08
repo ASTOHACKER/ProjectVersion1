@@ -79,21 +79,24 @@ export default function Shipping() {
       return
     }
 
+    // สร้างข้อมูลออเดอร์
+    const orderData = {
+      items: cart,
+      totalAmount: calculateTotal(),
+      status: formData.paymentMethod === 'cod' ? 'pending' : 'processing',
+      shippingAddress: {
+        fullName: formData.name,
+        address: formData.address,
+        phone: formData.phone,
+        postalCode: formData.postalCode,
+        note: formData.note || ''
+      },
+      paymentMethod: formData.paymentMethod
+    };
+
     // For COD payments
     if (formData.paymentMethod === 'cod') {
       try {
-        const orderData = {
-          items: cart,
-          totalAmount: calculateTotal(),
-          status: 'pending',
-          shippingDetails: {
-            name: formData.name,
-            address: formData.address,
-            phone: formData.phone,
-            postalCode: formData.postalCode
-          }
-        };
-
         const response = await fetch('/api/orders', {
           method: 'POST',
           headers: {
@@ -118,6 +121,83 @@ export default function Shipping() {
       }
     }
   }
+
+  const handleStripePayment = async (e) => {
+    e.preventDefault();
+    if (!stripe || !elements || !clientSecret) {
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/order-success`,
+          payment_method_data: {
+            billing_details: {
+              name: formData.name,
+              email: session?.user?.email,
+              phone: formData.phone,
+              address: {
+                line1: formData.address,
+                postal_code: formData.postalCode,
+                country: 'TH'
+              }
+            }
+          }
+        },
+        redirect: 'if_required'
+      });
+
+      if (error) {
+        toast.error(error.message || 'เกิดข้อผิดพลาดในการชำระเงิน');
+        return;
+      }
+
+      // บันทึกออเดอร์หลังจากชำระเงินสำเร็จ
+      const orderData = {
+        items: cart,
+        totalAmount: calculateTotal(),
+        status: 'processing',
+        shippingAddress: {
+          fullName: formData.name,
+          address: formData.address,
+          phone: formData.phone,
+          postalCode: formData.postalCode,
+          note: formData.note || ''
+        },
+        paymentMethod: 'credit',
+        paymentIntentId: paymentIntent.id,
+        paymentStatus: paymentIntent.status
+      };
+
+      const orderResponse = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!orderResponse.ok) {
+        throw new Error('Failed to save order');
+      }
+
+      if (typeof clearCart === 'function') {
+        clearCart();
+      }
+
+      toast.success('ชำระเงินสำเร็จ! กำลังดำเนินการสั่งซื้อ');
+      router.push(`/order-success?payment_intent=${paymentIntent.id}`);
+    } catch (err) {
+      console.error('Payment error:', err);
+      toast.error('เกิดข้อผิดพลาดในการชำระเงิน กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const formatPrice = (price) => {
     return price.toLocaleString('th-TH', {
@@ -309,7 +389,7 @@ export default function Shipping() {
               {clientSecret && (
                 <div className="mt-8">
                   <Elements options={options} stripe={stripePromise}>
-                    <CheckoutForm amount={calculateTotal()} formData={formData} />
+                    <CheckoutForm amount={calculateTotal()} formData={formData} handleStripePayment={handleStripePayment} />
                   </Elements>
                 </div>
               )}
