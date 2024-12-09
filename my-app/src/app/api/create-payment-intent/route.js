@@ -6,9 +6,10 @@ export async function POST(request) {
   try {
     const { amount } = await request.json();
 
-    // Create a PaymentIntent with the order amount and currency
+    // สร้าง PaymentIntent ด้ วยจำนวนเงินและสกุลเงิน
+    // Stripe ต องการจำนวนเงินเป นหน วยเงินเล กท สุด (satang) ด งน นต องแปลงจำนวนเงินจากบาทเป น satang
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Stripe expects amounts in smallest currency unit (satang)
+      amount: Math.round(amount * 100),
       currency: 'thb',
       automatic_payment_methods: {
         enabled: true,

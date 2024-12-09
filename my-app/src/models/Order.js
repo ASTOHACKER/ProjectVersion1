@@ -27,6 +27,11 @@ const OrderSchema = new mongoose.Schema({
     phone: String,
     postalCode: String
   },
+  paymentMethod: {
+    type: String,
+    enum: ['COD', 'Stripe'],
+    required: true
+  },
   paymentIntentId: String,
   createdAt: {
     type: Date,

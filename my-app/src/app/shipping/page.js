@@ -19,7 +19,7 @@ export default function Shipping() {
   const [formData, setFormData] = useState({
     name: '',
     address: '',
-    postalCode: '',
+    postalCode: '', 
     phone: '',
     paymentMethod: 'cod',
   })
@@ -84,14 +84,14 @@ export default function Shipping() {
       items: cart,
       totalAmount: calculateTotal(),
       status: formData.paymentMethod === 'cod' ? 'pending' : 'processing',
-      shippingAddress: {
-        fullName: formData.name,
+      shippingDetails: {
+        name: formData.name,
         address: formData.address,
         phone: formData.phone,
         postalCode: formData.postalCode,
         note: formData.note || ''
       },
-      paymentMethod: formData.paymentMethod
+      paymentMethod: formData.paymentMethod === 'cod' ? 'COD' : 'Stripe'
     };
 
     // For COD payments
@@ -161,14 +161,14 @@ export default function Shipping() {
         items: cart,
         totalAmount: calculateTotal(),
         status: 'processing',
-        shippingAddress: {
-          fullName: formData.name,
+        shippingDetails: {
+          name: formData.name,
           address: formData.address,
           phone: formData.phone,
           postalCode: formData.postalCode,
           note: formData.note || ''
         },
-        paymentMethod: 'credit',
+        paymentMethod: 'Stripe',
         paymentIntentId: paymentIntent.id,
         paymentStatus: paymentIntent.status
       };
@@ -286,8 +286,8 @@ export default function Shipping() {
                   className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg 
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                            focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           transition duration-150 ease-in-out"
-                  required
+                          transition duration-150 ease-in-out"
+                required
                   placeholder="กรุณากรอกชื่อผู้รับ"
                 />
               </div>
