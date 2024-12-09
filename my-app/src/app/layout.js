@@ -2,7 +2,7 @@ import './globals.css'
 import { Providers } from '@/app/providers'
 import { CartProvider } from "./providers/CartProvider";
 import { Toaster } from 'react-hot-toast';
-
+import Header from './components/Header';
 
 export const metadata = {
   title: 'FOODNEXT',

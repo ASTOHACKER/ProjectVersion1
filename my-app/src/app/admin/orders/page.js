@@ -99,7 +99,7 @@ export default function AdminOrders() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 h-screen">
       <h1 className="text-2xl font-bold mb-6">จัดการคำสั่งซื้อ</h1>
       
       <Table aria-label="Orders table">

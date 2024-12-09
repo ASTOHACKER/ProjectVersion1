@@ -83,7 +83,7 @@ export default function Shipping() {
     const orderData = {
       items: cart,
       totalAmount: calculateTotal(),
-      status: formData.paymentMethod === 'cod' ? 'pending' : 'processing',
+      status: 'pending',
       shippingDetails: {
         name: formData.name,
         address: formData.address,
@@ -119,8 +119,32 @@ export default function Shipping() {
         toast.error('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
         console.error('Order error:', error);
       }
+    } else if (formData.paymentMethod === 'stripe') {
+      try {
+        const response = await fetch('/api/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderData),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save order');
+        }
+        
+        if (typeof clearCart === 'function') {
+          clearCart();
+        }
+        
+        toast.success('สั่งซื้อสำเร็จ! ขอบคุณที่ใช้บริการ');
+        router.push('/order-success');
+      } catch (error) {
+        toast.error('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+        console.error('Order error:', error);
+      }
     }
-  }
+  };
 
   const handleStripePayment = async (e) => {
     e.preventDefault();
@@ -131,6 +155,37 @@ export default function Shipping() {
     setIsProcessing(true);
 
     try {
+      // บันทึกออเดอร์ก่อน
+      const orderData = {
+        items: cart,
+        totalAmount: calculateTotal(),
+        status: 'pending',
+        shippingDetails: {
+          name: formData.name,
+          address: formData.address,
+          phone: formData.phone,
+          postalCode: formData.postalCode,
+          note: formData.note || ''
+        },
+        paymentMethod: 'Stripe'
+      };
+
+      // บันทึกออเดอร์
+      const orderResponse = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!orderResponse.ok) {
+        throw new Error('Failed to save order');
+      }
+
+      const savedOrder = await orderResponse.json();
+
+      // ดำเนินการชำระเงินกับ Stripe
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
@@ -152,38 +207,30 @@ export default function Shipping() {
       });
 
       if (error) {
+        // ถ้าการชำระเงินไม่สำเร็จ อัพเดทสถานะออเดอร์เป็น cancelled
+        await fetch(`/api/orders/${savedOrder._id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: 'cancelled' }),
+        });
+        
         toast.error(error.message || 'เกิดข้อผิดพลาดในการชำระเงิน');
         return;
       }
 
-      // บันทึกออเดอร์หลังจากชำระเงินสำเร็จ
-      const orderData = {
-        items: cart,
-        totalAmount: calculateTotal(),
-        status: 'processing',
-        shippingDetails: {
-          name: formData.name,
-          address: formData.address,
-          phone: formData.phone,
-          postalCode: formData.postalCode,
-          note: formData.note || ''
-        },
-        paymentMethod: 'Stripe',
-        paymentIntentId: paymentIntent.id,
-        paymentStatus: paymentIntent.status
-      };
-
-      const orderResponse = await fetch('/api/orders', {
-        method: 'POST',
+      // อัพเดทสถานะและ payment intent ID
+      await fetch(`/api/orders/${savedOrder._id}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(orderData),
+        body: JSON.stringify({
+          status: 'processing',
+          paymentIntentId: paymentIntent.id
+        }),
       });
-
-      if (!orderResponse.ok) {
-        throw new Error('Failed to save order');
-      }
 
       if (typeof clearCart === 'function') {
         clearCart();
@@ -495,8 +542,8 @@ export default function Shipping() {
                     <input
                       type="radio"
                       name="paymentMethod"
-                      value="credit"
-                      checked={formData.paymentMethod === 'credit'}
+                      value="stripe"
+                      checked={formData.paymentMethod === 'stripe'}
                       onChange={handleInputChange}
                       className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                     />
