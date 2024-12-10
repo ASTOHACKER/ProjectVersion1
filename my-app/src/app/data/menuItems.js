@@ -42,9 +42,17 @@ export const menuItems = [
   {
     id: 6,
     type: 'ของหวาน',
-    name: 'มะพร้าว',
+    name: 'มะพร้าวพร้อมทาน',
     description: 'มะพร้าว',
     price: 35,
-    image: 'https://www.taokaecafe.com/asp-bin/pic_taokae/sh17074645.jpg'
+    image: 'https://s.isanook.com/he/0/ud/7/36801/istock-1337167226-re.jpg'
+  },
+  {
+    id : 7,
+    type: 'ของหวาน',
+    name: 'มะนาว',
+    description: 'มะนาว',
+    price: 35,
+    image: 'https://s.isanook.com/he/0/ud/7/36801/istock-1337167226-re.jpg'
   }
 ];
